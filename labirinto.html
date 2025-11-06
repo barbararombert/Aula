@@ -115,12 +115,6 @@
       { x: 90,  y: 430, w: 260, h: 10 }
     ];
 
-    // Moedas
-    const coins = [
-      { x: 80,  y: 70,  r: 8, collected: false },
-      { x: 260, y: 260, r: 8, collected: false },
-      { x: 120, y: 520, r: 8, collected: false }
-    ];
 
     // Porta de saída (só ativa depois de 3 moedas)
     const exitDoor = {
@@ -133,14 +127,15 @@
 
     let lastTime = 0;
     let gameStarted = false;
+    
+function resetGame() {
+  player.x = 40;
+  player.y = 560;
+  generateCoins(); 
+  exitDoor.active = false;
+  statusEl.textContent = "Inclina o telemóvel para mover o jogador. Apanha as 3 moedas e vai até à porta!";
+}
 
-    function resetGame() {
-      player.x = 40;
-      player.y = 560;
-      coins.forEach(c => c.collected = false);
-      exitDoor.active = false;
-      statusEl.textContent = "Inclina o telemóvel para mover o jogador. Apanha as 3 moedas e vai até à porta!";
-    }
 
     // Pedir permissão para usar o sensor em iOS / alguns browsers
     async function enableOrientation() {
@@ -166,6 +161,35 @@
         statusEl.textContent = "Erro ao tentar aceder ao sensor de movimento.";
       }
     }
+    let coins = [];
+
+function generateCoins() {
+  coins = [];
+  const numCoins = 3;
+  for (let i = 0; i < numCoins; i++) {
+    let valid = false;
+    let coin = {};
+    while (!valid) {
+      coin = {
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: Math.random() * (canvas.height - 40) + 20,
+        r: 8,
+        collected: false
+      };
+
+      // Verifica se está a colidir com alguma parede
+      valid = true;
+      for (const wall of walls) {
+        if (circleRectCollision(coin.x, coin.y, coin.r + 2, wall)) {
+          valid = false;
+          break;
+        }
+      }
+    }
+    coins.push(coin);
+  }
+}
+
 
     function handleOrientation(event) {
       // gamma: esquerda/direita, beta: frente/trás
@@ -316,9 +340,12 @@
       requestAnimationFrame(loop);
     }
 
-    resetGame();
-    requestAnimationFrame(loop);
+   generateCoins();
+resetGame();
+requestAnimationFrame(loop);
+
   </script>
 </body>
 </html>
+
 
