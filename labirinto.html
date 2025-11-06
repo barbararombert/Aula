@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini Labirinto – Telemóvel</title>
+  <title> Maze game </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <style>
     body {
@@ -38,7 +37,7 @@
       background: #222;
       border: 2px solid #555;
       border-radius: 8px;
-      width: 100%;     /* escala o canvas para caber no ecrã */
+      width: 100%;   
       height: auto;
     }
 
@@ -65,8 +64,8 @@
 </head>
 <body>
   <div id="info">
-    <div id="status">Inclina o telemóvel para mover o jogador. Apanha as 3 moedas e vai até à porta!</div>
-    <button id="startBtn">Ativar movimento do telemóvel</button>
+    <div id="status">Tilt your phone to move the player. Collect the 3 coins and go to the door!</div>
+    <button id="startBtn">Activate phone movement</button>
   </div>
 
   <div id="gameContainer">
@@ -79,26 +78,26 @@
     const statusEl = document.getElementById("status");
     const startBtn = document.getElementById("startBtn");
 
-    // Jogador
+    // Player
     const player = {
       x: 40,
       y: 560,
       r: 10
     };
 
-    // Tilt (inclinação do telemóvel)
+    // Tilt 
     let tiltX = 0; // esquerda/direita (gamma)
     let tiltY = 0; // cima/baixo (beta)
 
-    // Paredes do labirinto (retângulos)
+    // Walls of the maze 
     const walls = [
-      // Bordas
+      // Outside
       { x: 0,   y: 0,   w: 400, h: 10 },
       { x: 0,   y: 590, w: 400, h: 10 },
       { x: 0,   y: 0,   w: 10,  h: 600 },
       { x: 390, y: 0,   w: 10,  h: 600 },
 
-      // Paredes internas (podes mudar à vontade)
+      // Inside
       { x: 50,  y: 100, w: 300, h: 10 },
       { x: 50,  y: 100, w: 10,  h: 200 },
       { x: 90,  y: 290, w: 110, h: 10 },  
@@ -116,7 +115,7 @@
     ];
 
 
-    // Porta de saída (só ativa depois de 3 moedas)
+    // Exit Door 
     const exitDoor = {
       x: 330,
       y: 20,
@@ -133,11 +132,10 @@ function resetGame() {
   player.y = 560;
   generateCoins(); 
   exitDoor.active = false;
-  statusEl.textContent = "Inclina o telemóvel para mover o jogador. Apanha as 3 moedas e vai até à porta!";
+  statusEl.textContent = "Tilt your phone to move the player. Collect the 3 coins and go to the door!"
 }
 
-
-    // Pedir permissão para usar o sensor em iOS / alguns browsers
+    // Request permission on iOS / some browsers
     async function enableOrientation() {
       try {
         if (typeof DeviceOrientationEvent !== "undefined" &&
@@ -177,7 +175,7 @@ function generateCoins() {
         collected: false
       };
 
-      // Verifica se está a colidir com alguma parede
+      // Check if you are colliding with any walls
       valid = true;
       for (const wall of walls) {
         if (circleRectCollision(coin.x, coin.y, coin.r + 2, wall)) {
@@ -201,7 +199,7 @@ function generateCoins() {
       enableOrientation();
     });
 
-    // Colisão círculo-retângulo
+    // Collision
     function circleRectCollision(px, py, pr, rect) {
       const closestX = Math.max(rect.x, Math.min(px, rect.x + rect.w));
       const closestY = Math.max(rect.y, Math.min(py, rect.y + rect.h));
@@ -214,9 +212,9 @@ function generateCoins() {
     function update(dt) {
       if (!gameStarted) return;
 
-      // Converter tilt em velocidade
-      const maxSpeed = 4; // px por "frame"
-      const vx = (tiltX / 45) * maxSpeed; // inclinação de ~45º = velocidade máxima
+      // Convert tilt to speed
+      const maxSpeed = 4; // px para "frame"
+      const vx = (tiltX / 45) * maxSpeed; // ~45º incline = maximum speed X e Y 
       const vy = (tiltY / 45) * maxSpeed;
 
       // Movimento com resolução de colisão separada X/Y
@@ -226,7 +224,7 @@ function generateCoins() {
 
       for (const wall of walls) {
         if (circleRectCollision(player.x, player.y, player.r, wall)) {
-          player.x = oldX; // anula movimento em X
+          player.x = oldX; 
           break;
         }
       }
@@ -242,13 +240,13 @@ function generateCoins() {
         }
       }
 
-      // Limites (só para garantir)
+      // Limits
       if (player.x - player.r < 0) player.x = player.r;
       if (player.x + player.r > canvas.width) player.x = canvas.width - player.r;
       if (player.y - player.r < 0) player.y = player.r;
       if (player.y + player.r > canvas.height) player.y = canvas.height - player.r;
 
-      // Verificar recolha de moedas
+      // Check coin collection
       let collectedCount = 0;
       for (const c of coins) {
         if (!c.collected) {
@@ -264,12 +262,12 @@ function generateCoins() {
 
       statusEl.textContent = `Moedas apanhadas: ${collectedCount}/3`;
 
-      // Ativar porta
+      // Activate exit door
       if (collectedCount === coins.length) {
         exitDoor.active = true;
       }
 
-      // Verificar se jogador chegou à porta
+      // Verify player
       if (exitDoor.active) {
         const inDoorX = (player.x + player.r > exitDoor.x) &&
                         (player.x - player.r < exitDoor.x + exitDoor.w);
@@ -282,21 +280,21 @@ function generateCoins() {
       }
     }
 
-    // Desenhar
+    
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Fundo
+      // background
       ctx.fillStyle = "#222";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Paredes
+      // walls
       ctx.fillStyle = "#555";
       walls.forEach(w => {
         ctx.fillRect(w.x, w.y, w.w, w.h);
       });
 
-      // Moedas
+      // coins
       coins.forEach(c => {
         if (!c.collected) {
           ctx.beginPath();
@@ -309,7 +307,7 @@ function generateCoins() {
         }
       });
 
-      // Porta
+      // door
       if (exitDoor.active) {
         ctx.fillStyle = "#2ecc71";
       } else {
@@ -320,7 +318,7 @@ function generateCoins() {
       ctx.lineWidth = 2;
       ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
 
-      // Jogador
+      // player
       ctx.beginPath();
       ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
       ctx.fillStyle = "#0a84ff";
@@ -347,5 +345,6 @@ requestAnimationFrame(loop);
   </script>
 </body>
 </html>
+
 
 
